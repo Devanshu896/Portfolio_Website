@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devanshu. | Frontend Developer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --text-color: #e2e8f0;
+            --primary-color: #4f46e5;
+            --primary-hover: #6366f1;
+            --glass-bg: rgba(17, 24, 39, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Custom Cursor */
+        .cursor-dot, .cursor-circle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            will-change: transform;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .cursor-circle {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--primary-color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .link-hover .cursor-dot {
+            transform: translate(-50%, -50%) scale(0);
+        }
+
+        .link-hover .cursor-circle {
+            transform: translate(-50%, -50%) scale(1.5);
+            border-color: var(--primary-hover);
+        }
+
+        /* Split Screen Loader */
+        .loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loader-left, .loader-right {
+            width: 50%;
+            height: 100%;
+            background-color: var(--bg-color);
+            transform-origin: center center;
+            transition: transform 1s cubic-bezier(0.86, 0, 0.07, 1);
+        }
+
+        .loader-percent {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            font-weight: 800;
+            color: var(--text-color);
+            z-index: 10001;
+            opacity: 1;
+        }
+
+        /* Glassmorphism Effect */
+        .glass-effect {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+        }
+
+        /* Hero Gradient Text */
+        .hero-title-gradient {
+            background-image: linear-gradient(to right, #22d3ee, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Horizontal Scroll Pinning */
+        .horizontal-scroll-container {
+            display: flex;
+            height: 100vh;
+            align-items: center;
+            padding: 0 5vw;
+        }
+
+        .project-card {
+            min-width: 350px;
+            margin-right: 2rem;
+            flex-shrink: 0;
+        }
+
+        /* Circular Text Animation */
+        .circle-text {
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Marquee Animation */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 25s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* Mobile Menu */
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+
+        #mobile-menu.active {
+            transform: translateX(0);
+        }
+
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 overflow-x-hidden">
+
+    <div class="cursor-dot"></div>
+    <div class="cursor-circle"></div>
+
+    <div class="loader-wrapper">
+        <div class="loader-left"></div>
+        <div class="loader-right"></div>
+        <div class="loader-percent">0%</div>
+    </div>
+
+    <canvas id="starfield"></canvas>
+    
+    <main class="opacity-0 transition-opacity duration-1000">
+    
+    <header id="navbar" class="fixed top-0 left-0 w-full z-50 transition-all duration-300">
+        <nav class="container mx-auto flex items-center justify-between p-6 md:p-4">
+            <a href="#" class="text-3xl font-bold text-white hover:text-indigo-400 transition-colors duration-300">DS<span class="text-indigo-500">.</span></a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#about" class="text-slate-300 hover:text-white transition-colors duration-300">About</a>
+                <a href="#experience" class="text-slate-300 hover:text-white transition-colors duration-300">Experience</a>
+                <a href="#projects" class="text-slate-300 hover:text-white transition-colors duration-300">Projects</a>
+                <a href="#education" class="text-slate-300 hover:text-white transition-colors duration-300">Education</a>
+                <a href="#contact" class="text-slate-300 hover:text-white transition-colors duration-300">Contact</a>
+                <a href="#contact" class="px-6 py-2 rounded-full text-white font-semibold transform transition-transform duration-300 hover:scale-105" style="background-image: linear-gradient(to right, #4f46e5, #8b5cf6);">Let's Talk</a>
+            </div>
+            <button id="hamburger-menu" class="md:hidden text-white text-2xl z-50">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <div id="mobile-menu" class="fixed top-0 right-0 w-64 h-full glass-effect z-40 p-6 flex flex-col items-start space-y-4">
+        <button id="close-menu" class="text-white text-2xl self-end mb-4">
+            <i class="fas fa-times"></i>
+        </button>
+        <a href="#about" class="text-white text-xl hover:text-indigo-400">About</a>
+        <a href="#experience" class="text-white text-xl hover:text-indigo-400">Experience</a>
+        <a href="#projects" class="text-white text-xl hover:text-indigo-400">Projects</a>
+        <a href="#education" class="text-white text-xl hover:text-indigo-400">Education</a>
+        <a href="#contact" class="text-white text-xl hover:text-indigo-400">Contact</a>
+    </div>
+
+    <section id="hero" class="relative min-h-screen flex items-center justify-center p-6 md:p-12 text-center overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-cyan-900 to-blue-900 opacity-20 animate-pulse"></div>
+        <div class="relative z-10 max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-7xl font-extrabold mb-4 hero-text">
+                Hi, I'm <span class="hero-title-gradient">Devanshu</span>
+            </h1>
+            <p class="text-lg md:text-2xl text-gray-400 mb-8 hero-text">
+                Frontend Developer Ready to Build Your Next Product.
+            </p>
+            <p class="text-md md:text-lg text-gray-400 mb-12 max-w-2xl mx-auto hero-text">
+                A recent graduate with a passion for building beautiful and functional web applications.
+                I specialize in HTML, CSS, JavaScript, and have a strong foundation in modern frameworks like React.
+            </p>
+            <a href="#contact" class="inline-block px-8 py-4 rounded-full text-white font-semibold text-lg transform transition-transform duration-300 hover:scale-105 hero-button" style="background-image: linear-gradient(to right, #22d3ee, #3b82f6);">Let's Connect</a>
+        </div>
+        
+        <i class="fab fa-html5 absolute top-1/4 left-1/4 text-cyan-500 text-5xl opacity-40 animate-pulse-slow"></i>
+        <i class="fab fa-css3-alt absolute bottom-1/3 left-1/2 text-blue-500 text-5xl opacity-40 animate-pulse-slow delay-200"></i>
+        <i class="fab fa-js absolute top-1/2 right-1/4 text-yellow-500 text-5xl opacity-40 animate-pulse-slow delay-400"></i>
+        <i class="fab fa-react absolute top-1/4 right-1/2 text-cyan-300 text-5xl opacity-40 animate-pulse-slow delay-600"></i>
+        <i class="fab fa-java absolute bottom-1/4 right-1/4 text-red-500 text-5xl opacity-40 animate-pulse-slow delay-800"></i>
+        <i class="fas fa-code absolute top-1/3 left-1/3 text-gray-500 text-5xl opacity-40 animate-pulse-slow delay-1000"></i>
+        <i class="fab fa-python absolute bottom-1/4 left-1/4 text-yellow-600 text-5xl opacity-40 animate-pulse-slow delay-1200"></i>
+        <i class="fab fa-node-js absolute top-1/2 left-1/4 text-green-500 text-5xl opacity-40 animate-pulse-slow delay-1400"></i>
+    </section>
+
+    <section class="py-8 my-12 overflow-hidden">
+        <div class="marquee-container">
+            <div class="marquee-content flex">
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">Three.js</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">React</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">GSAP</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">Tailwind CSS</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">Next.js</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">Framer Motion</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">WebGL</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">Tableau</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">PowerBI</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">MySQL</span>
+            </div>
+            <div class="marquee-content flex">
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">Three.js</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">React</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">GSAP</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">Tailwind CSS</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">Next.js</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">Framer Motion</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">WebGL</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">Tableau</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">PowerBI</span>
+                <span class="text-4xl font-bold text-slate-500 px-8 flex-shrink-0">MySQL</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="container mx-auto py-24 px-6">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div class="relative w-full aspect-square glass-effect p-4 md:p-6 lg:p-8 transform-scale-animation">
+                <img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" alt="Programmer at work" class="w-full h-full object-cover rounded-lg">
+            </div>
+            <div class="about-text-content">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">Passionate Frontend Developer And Data Analyst</h2>
+                <p class="text-lg text-gray-400 mb-6">
+                    I believe in the power of code to create immersive, user-centric experiences. I'm a developer who combines a strong aesthetic sense with technical precision to build fast, beautiful, and accessible web applications. My journey began with a curiosity for how websites work, and it's evolved into a dedication to crafting exceptional digital products.
+                </p>
+                <p class="text-lg text-gray-400">
+                    I'm constantly pushing my boundaries, learning new technologies and design patterns to stay ahead in the ever-evolving world of web development. My goal is to create products that not only look good but also solve real-world problems with elegance and efficiency.
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <section id="portfolio" class="bg-[#0f0f10] py-24 px-6">
+        <div class="container mx-auto text-center mb-16">
+            <p class="text-slate-500 mb-2 text-lg">Portfolio</p>
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">Practice makes perfect.</h2>
+            <p class="text-lg text-gray-400 max-w-2xl mx-auto">I value quality over quantity, focusing my efforts on a select few projects that truly showcase my skills and dedication to crafting exceptional digital experiences.</p>
+        </div>
+        
+        <div class="relative w-80 h-80 md:w-96 md:h-96 mx-auto flex items-center justify-center">
+            <div class="absolute w-full h-full border border-gray-500 rounded-full flex items-center justify-center">
+                <div class="relative w-full h-full">
+                    <svg class="absolute inset-0 w-full h-full">
+                        <path id="circlePath" fill="none" stroke="none" d="M 400 200 A 200 200 0 1 1 400 200.01 z" />
+                        <text class="text-sm md:text-md text-gray-400 fill-current">
+                            <textPath href="#circlePath" class="circle-text">
+                                Portfolio &mdash; Portfolio &mdash; Portfolio &mdash; Portfolio &mdash;
+                            </textPath>
+                        </text>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-center z-10">
+                <h3 class="text-6xl md:text-8xl font-extrabold text-white">1<span class="text-indigo-500">+</span></h3>
+                <p class="text-lg text-gray-400 mt-2">Years of Data Analyst &</p>
+                <p class="text-lg text-gray-400">Development Experience</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience" class="container mx-auto py-24 px-6">
+        <h2 class="text-4xl md:text-5xl font-bold text-center mb-16">My Journey</h2>
+        <div class="relative max-w-3xl mx-auto timeline">
+            <div class="absolute w-1 bg-slate-700 h-full left-1/2 -translate-x-1/2 hidden md:block"></div>
+            
+            <div class="flex md:flex-row flex-col items-center justify-start mb-12 timeline-item">
+                <div class="hidden md:block w-1/2"></div>
+                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-700 absolute left-1/2 transform -translate-x-1/2 hidden md:block"></div>
+                <div class="w-full md:w-1/2 p-6 glass-effect text-left md:text-left md:ml-8 mt-4 md:mt-0">
+                    <p class="text-sm text-slate-400 mb-2">Present</p>
+                    <h3 class="text-2xl font-semibold text-white">Frontend Developer</h3>
+                    <p class="text-lg text-slate-300">Techiehelp</p>
+                    <ul class="list-disc list-inside mt-4 text-slate-400 text-base">
+                        <li>Built a responsive multi-page construction website.</li>
+                        <li>Designed modern UI/UX with clean layouts.</li>
+                        <li>Integrated contact form for client inquiries.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex md:flex-row-reverse flex-col items-center justify-start mb-12 timeline-item">
+                <div class="hidden md:block w-1/2"></div>
+                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-700 absolute left-1/2 transform -translate-x-1/2 hidden md:block"></div>
+                <div class="w-full md:w-1/2 p-6 glass-effect text-left md:text-right md:mr-8 mt-4 md:mt-0">
+                    <p class="text-sm text-slate-400 mb-2">2024 - Present</p>
+                    <h3 class="text-2xl font-semibold text-white">Data Analyst</h3>
+                    <p class="text-lg text-slate-300">Data Management</p>
+                    <ul class="list-disc list-inside mt-4 text-slate-400 text-base">
+                        <li>Designed a web-based dashboard for managing and analyzing datasets.</li>
+                        <li>Built interactive data tables with filtering, sorting, and search functionality. </li>
+                        <li>Integrated data upload and validation features (CSV/Excel).</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="flex md:flex-row flex-col items-center justify-start mb-12 timeline-item">
+                <div class="hidden md:block w-1/2"></div>
+                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-700 absolute left-1/2 transform -translate-x-1/2 hidden md:block"></div>
+                <div class="w-full md:w-1/2 p-6 glass-effect text-left md:text-left md:ml-8 mt-4 md:mt-0">
+                    <p class="text-sm text-slate-400 mb-2">2018 - 2020</p>
+                    <h3 class="text-2xl font-semibold text-white">Frontend Developer</h3>
+                    <p class="text-lg text-slate-300">Innovatech</p>
+                    <ul class="list-disc list-inside mt-4 text-slate-400 text-base">
+                        <li>Built responsive user interfaces with modern JS frameworks.</li>
+                        <li>Leveraged CSS preprocessors like SASS for efficient styling.</li>
+                        <li>Collaborated with design and backend teams on product features.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="py-24 px-6 overflow-hidden">
+        <h2 class="text-4xl md:text-5xl font-bold text-center mb-16">Featured Projects</h2>
+        <div id="projects-pin-container">
+            <div id="projects-track" class="flex">
+                <div class="project-card glass-effect p-8 flex flex-col items-start min-h-[450px]">
+                    <div class="w-16 h-16 rounded-full bg-indigo-500 text-white flex items-center justify-center text-3xl mb-4">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-white mb-2">Super_Store_Sales Dashboard</h3>
+                    <p class="text-lg text-slate-400 mb-4">Analyzed Superstore sales data using Excel, SQL, and Power BI.</p>
+                    <a href="#" class="mt-auto text-indigo-400 hover:underline">View Project &rarr;</a>
+                </div>
+                <div class="project-card glass-effect p-8 flex flex-col items-start min-h-[450px]">
+                    <div class="w-16 h-16 rounded-full bg-cyan-500 text-white flex items-center justify-center text-3xl mb-4">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-white mb-2">Hr_Analytics Dashboard</h3>
+                    <p class="text-lg text-slate-400 mb-4"> Excel, PowerBI, SQL is used to explore demographic distributions.</p>
+                    <a href="#" class="mt-auto text-cyan-400 hover:underline">View Project &rarr;</a>
+                </div>
+                <div class="project-card glass-effect p-8 flex flex-col items-start min-h-[450px]">
+                    <div class="w-16 h-16 rounded-full bg-emerald-500 text-white flex items-center justify-center text-3xl mb-4">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-white mb-2">E-commerce Site</h3>
+                    <p class="text-lg text-slate-400 mb-4">A fast, modern e-commerce platform built with Next.js, leveraging server-side rendering for improved performance and SEO.</p>
+                    <a href="#" class="mt-auto text-emerald-400 hover:underline">View Project &rarr;</a>
+                </div>
+                <div class="project-card glass-effect p-8 flex flex-col items-start min-h-[450px]">
+                    <div class="w-16 h-16 rounded-full bg-rose-500 text-white flex items-center justify-center text-3xl mb-4">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-white mb-2">WebGL Game</h3>
+                    <p class="text-lg text-slate-400 mb-4">A browser-based game using pure WebGL for high-performance graphics, demonstrating deep knowledge of 3D rendering pipelines.</p>
+                    <a href="#" class="mt-auto text-rose-400 hover:underline">View Project &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="education" class="container mx-auto py-24 px-6 text-center">
+        <h2 class="text-4xl md:text-5xl font-bold mb-16">My Education</h2>
+        <div class="grid md:grid-cols-2 gap-8 items-center justify-center">
+            <div class="glass-effect p-8 flex flex-col items-center text-center education-item">
+                <div class="w-16 h-16 rounded-full bg-indigo-500 text-white flex items-center justify-center text-3xl mb-4">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h3 class="text-2xl font-semibold text-white mb-2">BTech in Information Technology</h3>
+                <p class="text-lg text-slate-300">Raj Kumar Goel Institute Of Technology and Management</p>
+                <p class="text-sm text-slate-400 mt-2">2022 - 2026</p>
+            </div>
+            <div class="glass-effect p-8 flex flex-col items-center text-center education-item">
+                <div class="w-16 h-16 rounded-full bg-cyan-500 text-white flex items-center justify-center text-3xl mb-4">
+                    <i class="fas fa-award"></i>
+                </div>
+                <h3 class="text-2xl font-semibold text-white mb-2">Frontend Developer</h3>
+                <p class="text-lg text-slate-300">Techiehelp</p>
+                <p class="text-sm text-slate-400 mt-2">Ongoing Certification</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="container mx-auto py-24 px-6 text-center">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6">Let's Build the Future</h2>
+        <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-10">
+            I'm currently available for Data Analysis projects and new opportunities. Whether you have a project in mind or just want to say hello, feel free to reach out.
+        </p>
+        <a href="mailto:hello@vinz.com" class="text-4xl md:text-5xl font-bold inline-block" style="background-image: linear-gradient(to right, #4f46e5, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            devanshusingh23082005@gmail.com
+        </a>
+    </section>
+
+    <footer class="py-12 text-center text-sm text-gray-500">
+        <p class="mb-2">&copy; 2025 Devanshu Singh. All rights reserved.</p>
+        <p>Designed & Built with futuristic vibes.</p>
+    </footer>
+
+    </main>
+
+    <script>
+        // --- Custom Cursor ---
+        const cursorDot = document.querySelector(".cursor-dot");
+        const cursorCircle = document.querySelector(".cursor-circle");
+        const links = document.querySelectorAll("a, button");
+
+        document.addEventListener("mousemove", (e) => {
+            gsap.to(cursorDot, { x: e.clientX, y: e.clientY, duration: 0.1, ease: "power2.out" });
+            gsap.to(cursorCircle, { x: e.clientX, y: e.clientY, duration: 0.4, ease: "power2.out" });
+        });
+
+        links.forEach(link => {
+            link.addEventListener("mouseenter", () => {
+                document.body.classList.add("link-hover");
+            });
+            link.addEventListener("mouseleave", () => {
+                document.body.classList.remove("link-hover");
+            });
+        });
+        
+        // --- Starfield Background ---
+        const canvas = document.getElementById('starfield');
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setClearColor(0x000000, 0);
+        
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+
+        const starGeometry = new THREE.BufferGeometry();
+        const starVertices = [];
+        for (let i = 0; i < 5000; i++) {
+            const x = THREE.MathUtils.randFloatSpread(200);
+            const y = THREE.MathUtils.randFloatSpread(200);
+            const z = THREE.MathUtils.randFloatSpread(200);
+            starVertices.push(x, y, z);
+        }
+        starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+        const starMaterial = new THREE.PointsMaterial({ color: 0x4c51bf, size: 0.5, transparent: true, opacity: 0.7 });
+        const starField = new THREE.Points(starGeometry, starMaterial);
+        scene.add(starField);
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.zIndex = '-1';
+
+        let mouseX = 0;
+        let mouseY = 0;
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        function animateStars() {
+            requestAnimationFrame(animateStars);
+
+            const time = Date.now() * 0.0005;
+            starField.rotation.x += 0.0005;
+            starField.rotation.y += 0.0005;
+            
+            camera.position.x += (mouseX * 5 - camera.position.x) * 0.05;
+            camera.position.y += (mouseY * 5 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+
+            renderer.render(scene, camera);
+        }
+        animateStars();
+
+        // --- Loader Animation ---
+        const loaderLeft = document.querySelector(".loader-left");
+        const loaderRight = document.querySelector(".loader-right");
+        const loaderPercent = document.querySelector(".loader-percent");
+        const loaderWrapper = document.querySelector(".loader-wrapper");
+        const mainContent = document.querySelector("main");
+
+        let percent = 0;
+        const percentInterval = setInterval(() => {
+            if (percent < 100) {
+                percent++;
+                loaderPercent.textContent = `${percent}%`;
+            } else {
+                clearInterval(percentInterval);
+                gsap.to(loaderLeft, { scaleX: 1.66, duration: 1, ease: "power2.inOut" });
+                gsap.to(loaderRight, { scaleX: 1.66, duration: 1, ease: "power2.inOut", onComplete: () => {
+                    gsap.to(loaderLeft, { xPercent: -100, duration: 1, ease: "power4.inOut" });
+                    gsap.to(loaderRight, { xPercent: 100, duration: 1, ease: "power4.inOut" });
+                    gsap.to(loaderPercent, { opacity: 0, duration: 0.5 });
+                    gsap.to(loaderWrapper, { opacity: 0, duration: 1, delay: 1, onComplete: () => {
+                        loaderWrapper.style.display = "none";
+                        mainContent.style.opacity = 1;
+                    }});
+                }});
+            }
+        }, 10);
+
+        // --- GSAP Animations & ScrollTriggers ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Navbar on Scroll
+        gsap.to("#navbar", {
+            paddingTop: "1rem",
+            paddingBottom: "1rem",
+            backgroundColor: "rgba(17,24,39,0.7)",
+            backdropFilter: "blur(10px)",
+            duration: 0.3,
+            ease: "power1.out",
+            scrollTrigger: {
+                trigger: "body",
+                start: "100px top",
+                toggleActions: "play reverse play reverse"
+            }
+        });
+
+        // Hero Text Animation
+        gsap.from(".hero-text", {
+            y: 50,
+            opacity: 0,
+            duration: 1.2,
+            ease: "power3.out",
+            stagger: 0.2,
+            delay: 2.5
+        });
+
+        gsap.from(".hero-button", {
+            y: 50,
+            opacity: 0,
+            scale: 0.8,
+            duration: 1,
+            ease: "back.out(1.7)",
+            delay: 3
+        });
+
+        // Horizontal Project Scroll
+        const projectsTrack = document.getElementById("projects-track");
+        const projectCards = gsap.utils.toArray(".project-card");
+        const totalWidth = projectCards.length * (projectCards[0].offsetWidth + 32); // Card width + margin-right
+        const trackWidth = projectsTrack.scrollWidth;
+
+        gsap.to(projectsTrack, {
+            x: () => -(trackWidth - window.innerWidth + (window.innerWidth * 0.1)),
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#projects-pin-container",
+                pin: true,
+                scrub: 1,
+                end: () => `+=${trackWidth}`
+            }
+        });
+
+        // General Fade/Slide In for Sections
+        const sections = document.querySelectorAll("section:not(#hero)");
+        sections.forEach(section => {
+            gsap.from(section, {
+                opacity: 0,
+                y: 50,
+                duration: 1,
+                ease: "power2.out",
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                }
+            });
+        });
+        
+        // Mobile Menu Toggle
+        const hamburger = document.getElementById('hamburger-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const closeMenu = document.getElementById('close-menu');
+        
+        hamburger.addEventListener('click', () => {
+            mobileMenu.classList.add('active');
+        });
+        
+        closeMenu.addEventListener('click', () => {
+            mobileMenu.classList.remove('active');
+        });
+    </script>
+</body>
+</html>
